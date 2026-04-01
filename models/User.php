@@ -25,10 +25,9 @@ class User
         $stmt->bindParam(":password", $hashedPassword);
         $stmt->execute();
         return (int) $this->pdo->lastInsertId();
-
     }
 
-    public function userExists($username)
+    public function userExists(string $username)
     {
         $sql = "SELECT COUNT(*) FROM users WHERE username = :username";
         $stmt = $this->pdo->prepare($sql);
