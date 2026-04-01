@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: rgb(8, 59, 63);
+  color: rgb(253, 214, 105);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+}
+
+footer {
+  padding: 1rem;
+}
