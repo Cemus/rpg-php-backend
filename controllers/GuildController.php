@@ -1,14 +1,14 @@
 <?php
 namespace Controllers;
 
-use Models\User;
+use Models\Guild;
 
 class GuildController
 {
-    private $userModel;
+    private $guildModel;
 
-    public function __construct(User $userModel)
+    public function __construct(Guild $guildModel)
     {
-        $this->userModel = $userModel;
+        $this->guildModel = $guildModel;
     }
 }
