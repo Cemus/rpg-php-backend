@@ -1,39 +1,17 @@
 <?php
 
 namespace Models;
-use Exceptions\UserAlreadyExistsException;
+
 class User
 {
-    private $pdo;
+    public int $id;
+    public string $username;
+    public int|null $guildId = null;
 
-    public function __construct($pdo)
+    public function __construct(int $id, string $username, int|null $guildId = null)
     {
-        $this->pdo = $pdo;
-    }
-
-    public function create(string $username, string $password): int
-    {
-        if ($this->userExists($username)) {
-            throw new UserAlreadyExistsException();
-        }
-
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-        $sql = "INSERT INTO users (username,password) VALUES (:username,:password)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(":username", $username);
-        $stmt->bindParam(":password", $hashedPassword);
-        $stmt->execute();
-        return (int) $this->pdo->lastInsertId();
-    }
-
-    public function userExists(string $username)
-    {
-        $sql = "SELECT COUNT(*) FROM users WHERE username = :username";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(":username", $username);
-        $stmt->execute();
-
-        return $stmt->fetchColumn() > 0;
+        $this->id = $id;
+        $this->username = $username;
+        $this->guildId = $guildId;
     }
 }

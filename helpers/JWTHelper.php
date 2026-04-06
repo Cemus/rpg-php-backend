@@ -6,11 +6,10 @@ use Firebase\JWT\Key;
 
 class JWTHelper
 {
-    public static function generateJWT(int $userId, string $username): string
+    public static function generateJWT(int $userId): string
     {
         $payload = [
             'sub' => $userId,
-            'username' => $username,
             'iat' => time(),
             'exp' => time() + 3600
         ];

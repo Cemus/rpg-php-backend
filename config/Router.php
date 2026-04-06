@@ -1,5 +1,6 @@
 <?php
 namespace Config;
+
 class Router
 {
     private static ?Router $instance = null;
@@ -27,16 +28,20 @@ class Router
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $method = $_SERVER['REQUEST_METHOD'];
 
+        $request = new \Config\Request();
+
+
         foreach ($this->routes as $route) {
             if ($route['path'] === $uri && $route['method'] === $method) {
 
                 foreach ($route['middlewares'] as $mw) {
-                    $res = $mw();
+                    $res = \call_user_func($mw, $request);
                     if ($res === false)
                         return;
                 }
 
-                call_user_func($route['callback']);
+
+                \call_user_func($route['callback'], $request);
                 return;
             }
         }

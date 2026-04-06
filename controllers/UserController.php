@@ -1,16 +1,19 @@
 <?php
 namespace Controllers;
 
-use Models\User;
+use Repositories\UserRepository;
 use Helpers\JWTHelper;
+use Services\UserService;
 
 class UserController
 {
-    private $userModel;
+    private $userRepository;
+    private $userService;
 
-    public function __construct(User $userModel)
+    public function __construct(UserRepository $userRepository, UserService $userService)
     {
-        $this->userModel = $userModel;
+        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     public function register()
@@ -34,9 +37,9 @@ class UserController
         }
 
         try {
-            $userId = $this->userModel->create($username, $password);
+            $userId = $this->userRepository->create($username, $password);
 
-            $jwt = JWTHelper::generateJWT($userId, $username);
+            $jwt = JWTHelper::generateJWT($userId);
 
             setcookie("token", $jwt, [
                 "httponly" => true,
@@ -58,53 +61,53 @@ class UserController
     {
         header('Content-Type: application/json');
 
-        $token = $_COOKIE['token'] ?? null;
-        if (!$token) {
-            http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
             return;
         }
 
+        $input = json_decode(file_get_contents('php://input'), true);
+        $username = $input['username'] ?? '';
+        $password = $input['password'] ?? '';
+
         try {
-            $payload = JWTHelper::validateJWT($token);
-            echo json_encode([
-                'status' => 'ok',
-                'message' => 'Authenticated',
-                'user' => [
-                    'id' => $payload->sub,
-                    'username' => $payload->username
-                ]
+            $userId = $this->userRepository->verify($username, $password);
+
+            $jwt = JWTHelper::generateJWT($userId);
+
+            setcookie("token", $jwt, [
+                "httponly" => true,
+                "secure" => false, // E N  D E V
+                "path" => "/",
+                "samesite" => "Lax",
+                "expires" => time() + 3600
             ]);
+
+            echo json_encode(['status' => 'ok', 'message' => "$username authenticated"]);
+
         } catch (\Exception $e) {
-            http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Invalid token']);
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
-    public function profile()
+    public function getProfile($request)
     {
         header('Content-Type: application/json');
 
-        $token = $_COOKIE['token'] ?? null;
-        if (!$token) {
-            http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
-            return;
-        }
-
         try {
-            $payload = JWTHelper::validateJWT($token);
+
+            $userInfos = $this->userService->getUserInfos($request->user->sub);
+            error_log((string) json_encode($userInfos));
             echo json_encode([
                 'status' => 'ok',
                 'message' => 'Authenticated',
-                'user' => [
-                    'id' => $payload->sub,
-                    'username' => $payload->username
-                ]
+                'data' => $userInfos
             ]);
         } catch (\Exception $e) {
             http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Invalid token']);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 }

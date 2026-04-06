@@ -7,9 +7,12 @@
     "psr-4": {
       "Config\\": "config/",
       "Controllers\\": "controllers/",
-      "Models\\": "models/",
+      "Repositories\\": "repositories/",
       "Exceptions\\": "exceptions/",
-      "Helpers\\": "helpers/"
+      "Helpers\\": "helpers/",
+      "Services\\": "services/",
+      "Middlewares\\": "middlewares/",
+      "Models\\": "models/"
     }
   }
 }
